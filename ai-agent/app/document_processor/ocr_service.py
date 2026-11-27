@@ -8,16 +8,20 @@ if OCR is unavailable or fails, the page is reported as unreadable.
 import io
 import logging
 import os
-import pytesseract
-from typing import Tuple
+from typing import Tuple, Optional, Any
 
 logger = logging.getLogger(__name__)
 
-# Configure Tesseract executable
-pytesseract.pytesseract.tesseract_cmd = os.getenv(
-    "TESSERACT_CMD",
-    r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-)
+try:
+    import pytesseract
+    pytesseract.pytesseract.tesseract_cmd = os.getenv(
+        "TESSERACT_CMD",
+        r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+    )
+    HAS_PYTESSERACT = True
+except Exception:
+    pytesseract = None
+    HAS_PYTESSERACT = False
 
 
 class OCRService:
@@ -57,15 +61,9 @@ class OCRService:
             return "", False, 0.0
 
         try:
-            import pytesseract
+            if not HAS_PYTESSERACT or pytesseract is None:
+                return "", False, 0.0
             from PIL import Image, ImageOps
-
-            # Optional Windows configuration:
-            # Set TESSERACT_CMD to the full path of tesseract.exe.
-            pytesseract.pytesseract.tesseract_cmd = os.getenv(
-                "TESSERACT_CMD",
-                r"C:\Program Files\Tesseract-OCR\tesseract.exe"
-            )
 
             language = os.getenv("TESSERACT_LANG", "eng")
 

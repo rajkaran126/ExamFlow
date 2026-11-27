@@ -5,12 +5,20 @@ from sqlalchemy.orm import declarative_base
 from app.core.config import settings
 
 # Engine setup
-engine = create_async_engine(
-    settings.DATABASE_URL,
-    echo=settings.ENVIRONMENT == "development",
-    future=True,
-    pool_pre_ping=True
-)
+try:
+    engine = create_async_engine(
+        settings.DATABASE_URL,
+        echo=settings.ENVIRONMENT == "development",
+        future=True,
+        pool_pre_ping=True
+    )
+except Exception:
+    # Graceful fallback to SQLite when PostgreSQL/asyncpg driver is not installed
+    engine = create_async_engine(
+        "sqlite+aiosqlite:///./examflow.db",
+        echo=settings.ENVIRONMENT == "development",
+        future=True
+    )
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,

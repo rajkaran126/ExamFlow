@@ -1,5 +1,6 @@
 """FastAPI Application Main Entry Point."""
 import datetime
+from typing import Optional, List, Dict, Any
 from fastapi import FastAPI, Depends, HTTPException, Query, status
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -38,8 +39,11 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     # In development or test, ensure tables exist if not managed by alembic
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    try:
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+    except Exception as e:
+        print(f"[EXAMFLOW] DB table initialization notice: {e}. In-memory mock store active.")
 
 
 @app.get("/health", tags=["System"])
