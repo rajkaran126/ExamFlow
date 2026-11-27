@@ -30,5 +30,33 @@ services:
     depends_on:
       - db
 
+  ai-agent:
+    build:
+      context: ./ai-agent
+      dockerfile: Dockerfile
+    container_name: examflow-ai-agent
+    restart: always
+    environment:
+      PORT: "8080"
+      HOST: "0.0.0.0"
+      ENVIRONMENT: production
+      BACKEND_API_BASE_URL: http://backend:8080/api
+    ports:
+      - "8001:8080"
+    depends_on:
+      - backend
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: examflow-frontend
+    restart: always
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+      - ai-agent
+
 volumes:
   pgdata:

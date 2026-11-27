@@ -7,6 +7,14 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
+      '/api/chat': {
+        target: process.env.VITE_AI_AGENT_URL || 'http://localhost:8001',
+        changeOrigin: true,
+      },
+      '/api/documents': {
+        target: process.env.VITE_AI_AGENT_URL || 'http://localhost:8001',
+        changeOrigin: true,
+      },
       '/api': {
         target: process.env.VITE_BACKEND_URL || 'http://localhost:8000',
         changeOrigin: true,
